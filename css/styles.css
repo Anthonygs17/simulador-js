@@ -1,0 +1,20 @@
+body {
+    background-color: azure;
+}
+
+input {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+}
+
+#boton-start{
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+#boton-send{
+    margin-left: 0.5rem;
+    margin-bottom: 0.2rem;
+}

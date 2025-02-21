@@ -5,12 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodingTec</title>
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <h1>Simulador de inscripcion de cursos</h1>
-    <h2>La idea de esta pagina es simular el proceso de inscripcion a cursos de programacion en distintas areas, como plataformas moviles, web y hasta videojuegos.</h2>
-    <h2>Este simulador emplea cuadros de dialogo y la consola JS para interactuar con el usuario.</h2>
-    <!-- Disclaimer: La primera vez los cuadros de dialogo impiden que la salida de la consola JS se muestre al usuario -->
-    <script src="index.js"></script>
+    <div class="container">
+        <h1>Simulador de inscripcion de cursos</h1>
+        <h3>La idea de esta pagina es simular el proceso de inscripcion a cursos de programacion en distintas areas, como
+            plataformas moviles, web y hasta videojuegos.</h3>
+        <h3>Este simulador manipula elementos del DOM y eventos para interactuar con el usuario.</h3>
+        <button id="boton-start" class="btn btn-info" onclick="iniciarSimulador()">Iniciar simulador</button>
+        <div id="content">
+            <div id="interaccion"></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="js/index.js"></script>
 </body>
 </html>
