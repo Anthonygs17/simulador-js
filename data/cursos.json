@@ -1,0 +1,42 @@
+[
+    {
+        "id": 1,
+        "nombre": "Desarrollo Web",
+        "descripcion": "Aprende a crear sitios web con HTML, CSS y JavaScript",
+        "duracion": 12,
+        "valor": 180,
+        "imagen": "./images/desarrollo-web.jpg"
+    },
+    {
+        "id": 2,
+        "nombre": "Desarrollo Backend",
+        "descripcion": "Aprende a crear servidores con Node.js, Express y MongoDB",
+        "duracion": 12,
+        "valor": 210,
+        "imagen": "./images/desarrollo-backend.jpg"
+    },
+    {
+        "id": 3,
+        "nombre": "Desarrollo móvil",
+        "descripcion": "Aprende a crear aplicaciones móviles con Flutter",
+        "duracion": 16,
+        "valor": 260,
+        "imagen": "./images/desarrollo-movil.png"
+    },
+    {
+        "id": 4,
+        "nombre": "Desarrollo de videojuegos",
+        "descripcion": "Aprende a desarrollar videojuegos con Unity",
+        "duracion": 16,
+        "valor": 280,
+        "imagen": "./images/desarrollo-videojuegos.jpg"
+    },
+    {
+        "id": 5,
+        "nombre": "Machine Learning",
+        "descripcion": "Aprende a crear modelos de aprendizaje automatico con Python",
+        "duracion": 16,
+        "valor": 250,
+        "imagen": "./images/machine-learning.jpg"
+    }
+]

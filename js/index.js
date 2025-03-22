@@ -1,141 +1,202 @@
-const cursos = [
-    {
-        id: 1,
-        nombre: "Desarrollo Web",
-        descripcion: "Aprende a crear sitios web con HTML, CSS y JavaScript",
-        duracion: 12,
-        valor: 180
-    },
-    {
-        id: 2,
-        nombre: "Desarrollo Backend",
-        descripcion: "Aprende a crear servidores con Node.js, Express y MongoDB",
-        duracion: 12,
-        valor: 210
-    },
-    {
-        id: 3,
-        nombre: "Desarrollo móvil",
-        descripcion: "Aprende a crear aplicaciones móviles con Flutter",
-        duracion: 16,
-        valor: 260
-    },
-    {
-        id: 4,
-        nombre: "Desarrollo de videojuegos",
-        descripcion: "Aprende a desarrollar videojuegos con Unity",
-        duracion: 16,
-        valor: 280
-    },
-    {
-        id: 5,
-        nombre: "Inteligencia artificial",
-        descripcion: "Aprende a crear modelos de inteligencia artificial con Python",
-        duracion: 16,
-        valor: 250
-    }
-];
+import { notificarUsuario, confirmacionPopup } from "./utils.js";
 
-const cart = [];
+let cursos = [];
+let cart = localStorage.getItem("carrito") ? JSON.parse(localStorage.getItem("carrito")) : [];
+
+async function fetchData() {
+    try {
+        const response = await fetch("./data/cursos.json");
+        cursos = await response.json();
+    } catch (error) {
+        console.error("Error", error);
+    }
+}
+
+function updateCartStatus() {
+    cart = localStorage.getItem("carrito");
+    cart = cart ? JSON.parse(cart) : [];
+    let cartCount = cart.length;
+
+    const cartBtn = document.getElementById("cart-btn");
+    const cartBadge = document.getElementById("cart-badge");
+    cartBadge.textContent = cartCount;
+    if (cartCount > 0) {
+        cartBadge.classList.remove("d-none");
+        cartBtn.style.cursor = "pointer";
+        confirmEnrollment();
+    } else {
+        cartBadge.classList.add("d-none");
+        cartBtn.style.cursor = "default";
+        confirmEnrollment(false);
+    }
+}
+
+function getCardsSelected() {
+    const buttons = document.querySelectorAll("button[id^='btn-product-']");
+    buttons.forEach(button => {
+        const id = parseInt(button.id.split("-")[2]);
+        const cursoAgregado = cart.some(curso => curso.id === id);
+        if (cursoAgregado) {
+            updateCardBtn(id);
+        }
+    });
+}
+
+function agregarCurso(id) {
+    cart = localStorage.getItem("carrito");
+    cart = cart ? JSON.parse(cart) : [];
+
+    const cursoIndex = cart.findIndex(item => item.id === id);
+    if (cursoIndex === -1) {
+        const curso = cursos.find(curso => curso.id === id);
+        cart.push(curso);
+        localStorage.setItem("carrito", JSON.stringify(cart));
+        notificarUsuario(`Se ha inscrito a ${curso.nombre}`);
+        updateCardBtn(id);
+        updateCartStatus();
+        confirmEnrollment();
+    } else {
+        notificarUsuario("El curso ya se encuentra inscrito", "#f44336");
+    }
+}
+
+function updateCardBtn(id){
+    const button = document.getElementById(`btn-product-${id}`);
+    button.textContent = "Inscrito";
+    button.disabled = true;
+    const botonBorrar = document.createElement("button");
+    botonBorrar.textContent = "Quitar";
+    botonBorrar.className = "btn btn-danger";
+    botonBorrar.onclick = function () {
+        cart = cart.filter(curso => curso.id !== id);
+        localStorage.setItem("carrito", JSON.stringify(cart));
+        notificarUsuario("Curso eliminado", "#f44336");
+        updateCartStatus();
+        button.textContent = "Inscribirme";
+        button.disabled = false;
+        button.parentNode.removeChild(botonBorrar);
+    };
+    button.parentNode.appendChild(botonBorrar);
+}
 
 function mostrarCursos(){
-    let lista = document.createElement("ol");
-    lista.className = "list-group list-group-numbered";
-    lista.style.margin = "0rem 2rem 1rem";
+    const container = document.getElementById("card-container");
     cursos.forEach(curso => {
-        let item = document.createElement("li");
-        item.className = "list-group-item";
-        item.style.whiteSpace = "pre";
-        item.textContent = `${curso.nombre}\n${curso.descripcion}\nDuración: ${curso.duracion} semanas\t\t\t\t\t\tPrecio: $${curso.valor}`;
-        lista.appendChild(item);
+        let item = document.createElement("div");
+        item.className = "col-md-3";
+        item.innerHTML = `
+        <div class="card">
+            <img src="${curso.imagen}" class="card-img-top" alt="${curso.nombre}">
+            <div class="card-body">
+                <h5 class="card-title text-center">${curso.nombre}</h5>
+                <p class="card-text">${curso.descripcion}</p>
+                <p class="card-text">Duración: ${curso.duracion} semanas</p>
+                <p class="card-text">Precio: $${curso.valor}</p>
+            </div>
+            <div class="card-footer text-center">
+                <button class="btn btn-info" id="btn-product-${curso.id}">Inscribirme</button>
+            </div>
+        </div>`;
+        container.appendChild(item);
+        const button = item.querySelector(`#btn-product-${curso.id}`);
+        button.addEventListener("click", () => {
+            agregarCurso(curso.id);
+        });
     });
-    document.getElementById("content").insertBefore(lista, document.getElementById("interaccion"));
+    document.getElementById("content").insertBefore(container, document.getElementById("interaccion"));
 }
 
-function elegirCurso(){
-    let pregunta = document.getElementById("pregunta");
-    pregunta.textContent = "Ingrese el número del curso en el que desea inscribirse";
-    let cuadro = document.getElementById("cuadro");
-    cuadro.setAttribute("type", "number");
-    let boton = document.getElementById("boton-send");
-    boton.onclick = function(){
-        if(document.getElementById("error") !== null){
-            document.getElementById("interaccion").removeChild(document.getElementById("error"));
-        }
-        let eleccion = parseInt(cuadro.value);
-        let curso = cursos.find(curso => curso.id === eleccion);
-        if(curso !== undefined){
-            cart.push(curso);
-            let inscripcion = document.createElement("p");
-            inscripcion.textContent = `Se ha inscrito correctamente a ${curso.nombre}`;
-            document.getElementById("interaccion").insertBefore(inscripcion, pregunta);
-            pregunta.textContent = "¿Desea inscribirse en otro curso? (s/n)";
-            cuadro.setAttribute("type", "text");
-            cuadro.value = "";
-            consultarUsuario();
-        }else{
-            let error = document.createElement("p");
-            error.setAttribute("id", "error");
-            error.textContent = `Curso ${eleccion} no encontrado, intente de nuevo`;
-            document.getElementById("interaccion").appendChild(error);
-        }
-    };
-}
-
-function realizarInscripcion(){
-    let pregunta = document.createElement("p");
-    pregunta.textContent = "¿Desea inscribirse en un curso? (s/n)";
-    pregunta.setAttribute("id", "pregunta");
-    document.getElementById("interaccion").appendChild(pregunta);
-    let cuadro = document.createElement("input");
-    cuadro.setAttribute("id", "cuadro");
-    cuadro.setAttribute("type", "text");
-    document.getElementById("interaccion").appendChild(cuadro);
-    let boton = document.createElement("button");
-    boton.textContent = "Enviar";
-    boton.setAttribute("id", "boton-send");
-    boton.className = "btn btn-secondary";
-    document.getElementById("interaccion").appendChild(boton);
-    boton.onclick = function(){
-        let eleccion = cuadro.value;
-        if(eleccion === "n" || eleccion === null || eleccion === "" || eleccion !== "s"){
-            let despedida = document.createElement("p");
-            despedida.textContent = "¡Gracias por visitarnos!";
-            document.getElementById("interaccion").appendChild(despedida);
-            cuadro.disabled = true;
-            boton.disabled = true;
-        }else{
-            elegirCurso();
-        }
-    };
-}
-
-function consultarUsuario(){
-    let cuadro = document.getElementById("cuadro");
-    let boton = document.getElementById("boton-send");
-    boton.onclick = function(){
-        let eleccion = cuadro.value;
-        if(eleccion === "n" || eleccion === null || eleccion === "" || eleccion !== "s"){
-            let despedida = document.createElement("p");
-            despedida.textContent = "¡Gracias por su inscripcion!";
-            document.getElementById("interaccion").appendChild(despedida);
-            cuadro.disabled = true;
-            boton.disabled = true;
-            localStorage.setItem("cursos", JSON.stringify(cart));
-        }else{
-            let interaccion = document.getElementById("interaccion");
-            interaccion.removeChild(interaccion.firstChild);
-            elegirCurso();
-        }
-    };
-}
-
-function iniciarSimulador(){
-    let boton = document.getElementById("boton-start");
-    boton.disabled = true;
-    let texto = document.createElement("p");
-    texto.textContent = "¡Bienvenido a CodingTec! A continuación, le mostraremos los cursos disponibles";
-    document.getElementById("content").insertBefore(texto, document.getElementById("interaccion"));
+function resetCards() {
+    const container = document.getElementById("card-container");
+    container.innerHTML = "";
+    document.getElementById("content").insertBefore(container, document.getElementById("interaccion"));
     mostrarCursos();
-    realizarInscripcion();
 }
+
+function getTotalAmount() {
+    return cart.reduce((acc, curso) => acc + curso.valor, 0);
+}
+
+function displayTotalAmount() {
+    const interaccion = document.getElementById("interaccion");
+    const totalTextId = "total-text";
+    const confirmButtonId = "boton-confirmar";
+
+    const existingTotalText = document.getElementById(totalTextId);
+    if (existingTotalText) {
+        interaccion.removeChild(existingTotalText);
+    }
+
+    const total = getTotalAmount();
+    const totalText = document.createElement("h3");
+    totalText.setAttribute("id", totalTextId);
+    totalText.textContent = `Total a pagar: $${total}`;
+    totalText.style.fontWeight = "bold";
+
+    const confirmButton = document.getElementById(confirmButtonId);
+    if (confirmButton) {
+        interaccion.insertBefore(totalText, confirmButton);
+    } else {
+        interaccion.appendChild(totalText);
+    }
+}
+
+function confirmEnrollment(pending = true) {
+    if(pending == false){
+        document.getElementById("interaccion").innerHTML = "";
+        return;
+    }
+    displayTotalAmount();
+    if(document.getElementById("boton-confirmar") !== null){
+        return;
+    }
+    let boton = document.createElement("button");
+    boton.textContent = "Confirmar inscripción";
+    boton.className = "btn btn-lg btn-primary";
+    boton.setAttribute("id", "boton-confirmar");
+    boton.onclick = async function () {
+        localStorage.setItem("carrito", JSON.stringify(cart));
+        try {
+            const result = await confirmacionPopup();
+            const { name, email } = result;
+            /* Aqui enviariamos la informacion del curso al correo del usuario... */
+            limpiarContenido();
+        }
+        catch (error) {
+            if(error === "Canceled"){
+                return;
+            }
+            console.error(error);
+            notificarUsuario("Error al enviar los datos", "#f44336");
+        }
+    };
+    document.getElementById("interaccion").appendChild(boton);
+}
+
+function limpiarContenido() {
+    localStorage.removeItem("carrito");
+    updateCartStatus();
+    resetCards();
+    document.getElementById("interaccion").innerHTML = "";
+}
+
+async function iniciarSimulador() {
+    let texto = document.createElement("p");
+    texto.textContent = "¡Bienvenido! Ofrecemos los siguientes cursos";
+    document.getElementById("content").insertBefore(texto, document.getElementById("interaccion"));
+    await fetchData();
+    mostrarCursos();
+    updateCartStatus();
+    getCardsSelected();
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    iniciarSimulador();
+
+    document.getElementById('cart-btn').addEventListener('click', function() {
+        const confirmationButton = document.getElementById('boton-confirmar');
+        if (confirmationButton) {
+            confirmationButton.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});
